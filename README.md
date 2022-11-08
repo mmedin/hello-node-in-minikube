@@ -22,3 +22,24 @@ The second requirement is the command line tool for Kubernetes [kubeclt](https:/
 ```console
 alias kubectl="minikube kubectl --"
 ```
+
+Finally, we need [Docker](https://www.docker.com/) to perform the build and get an image containing our sample application. Installation details [here](https://www.docker.com/get-started/)
+
+## We pack the app in a container
+
+Inside this repo, in the [hello-node](hello-node/) folder you will find 2 files with enough code to build a basic nodejs app (package.json and server.js).
+
+Before deploying this application in our minikube "cluster", we must perform a build to obtain a container with the app and its dependencies.
+
+```bash
+cd hello-node
+docker build -t hello-node:1.0.0 .
+```
+
+This will generate a local container. We can see it with `docker images`:
+
+```console
+# docker images
+REPOSITORY   TAG       IMAGE ID       CREATED          SIZE
+hello-node   1.0.0     f811a976efe9   10 minutes ago   122MB
+```
