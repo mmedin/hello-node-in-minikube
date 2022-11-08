@@ -127,3 +127,43 @@ para bajar a un archivo el YAML con la definición, y lo editamos para agrelarle
         imagePullPolicy: Never
 ...
 ```
+
+Y finalmente aplicamos el YAML para crear el deployment:
+
+```bash
+kubectl apply -f hello-node-deployment.yaml
+```
+
+Podemos verificar que está arriba nuestro deployment y el pod asociado:
+
+```console
+# kubectl get deployments
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+hello-node   1/1     1            1           8s
+# kubectl get pods
+NAME                          READY   STATUS    RESTARTS   AGE
+hello-node-6c8fb57d94-8xr4s   1/1     Running   0          16s
+```
+
+## Crear un Service
+
+Para lograr que el contenedor `hello-node` sea accesible desde afuera de la red virtual Kubernetes, se debe exponer el Pod como un [Service](https://kubernetes.io/docs/concepts/services-networking/service/) de Kubernetes:
+
+```bash
+kubectl expose deployment hello-node --type=LoadBalancer --port=8080
+```
+
+Verificando:
+
+```console
+# kubectl get services
+NAME         TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+hello-node   LoadBalancer   10.106.92.22   <pending>     8080:32004/TCP   40s
+kubernetes   ClusterIP      10.96.0.1      <none>        443/TCP          4h52m
+```
+
+Hemos llegado al final, y como resultado tenemos que poder ver nuestra app funcionando en el browser:
+
+```bash
+minikube service hello-node
+```
