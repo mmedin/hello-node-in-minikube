@@ -93,7 +93,7 @@ Before creating the deployment we must "give" to minikube the container we creat
 minikube image load hello-node:1.0.0
 ```
 
-Verificamos que la imagen está disponible:
+Verifying the image is available:
 
 ```console
 # minikube image ls
