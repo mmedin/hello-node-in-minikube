@@ -82,3 +82,103 @@ minikube dashboard
 ```
 
 (ctrl-c to get the prompt back)
+
+## Creating a deployment
+
+A [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) in Kubernetes is a group of one or more containers, associated by its purpose and sharing storage and network. The Pod in this tutorial has only one container.
+
+Before creating the deployment we must "give" to minikube the container we created locally with Docker. In a real context, we should have uploaded the container to some registry service, but in this simplified practice we just work with it locally:
+
+```bash
+minikube image load hello-node:1.0.0
+```
+
+Verificamos que la imagen está disponible:
+
+```console
+# minikube image ls
+...
+docker.io/library/hello-node:1.0.0
+...
+```
+
+Now, let's go to deployment. Normally we would run the following:
+
+```bash
+kubectl create deployment hello-node --image=hello-node:1.0.0
+```
+
+but in our case we need an additional step to prevent minikube from searching for the image in the registry instead of doing it locally. So we run:
+
+```bash
+kubectl create deployment hello-node --image=hello-node:1.0.0 -o yaml --dry-run > hello-node-deployment.yaml
+```
+
+in order to download the YAML definition to a file, and then we edit it to add the `imagePullPolicy: Never` parameter:
+
+```console
+# vim hello-node-deployment.yaml
+...
+    spec:
+      containers:
+      - image: hello-node:1.0.0
+        name: hello-node
+        resources: {}
+        imagePullPolicy: Never
+...
+```
+
+And finally we apply the YAML to create the deployment:
+
+```bash
+kubectl apply -f hello-node-deployment.yaml
+```
+
+We can verify that our deployment and the associated pod is up and running:
+
+```console
+# kubectl get deployments
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+hello-node   1/1     1            1           8s
+# kubectl get pods
+NAME                          READY   STATUS    RESTARTS   AGE
+hello-node-6c8fb57d94-8xr4s   1/1     Running   0          16s
+```
+
+## Creating a Service
+
+To make the `hello-node` container accessible from outside the Kubernetes virtual network, the Pod must be exposed as a Kubernetes [Service](https://kubernetes.io/docs/concepts/services-networking/service/):
+
+```bash
+kubectl expose deployment hello-node --type=LoadBalancer --port=8080
+```
+
+Checking:
+
+```console
+# kubectl get services
+NAME         TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+hello-node   LoadBalancer   10.106.92.22   <pending>     8080:32004/TCP   40s
+kubernetes   ClusterIP      10.96.0.1      <none>        443/TCP          4h52m
+```
+
+We have reached the end, and as a result we should be able to see our app running in the browser:
+
+```bash
+minikube service hello-node
+```
+
+## Cleaning
+
+We delete all resources in reverse order (compared to creation):
+
+```bash
+kubectl delete service hello-node
+kubectl delete deployment hello-node
+```
+
+We remove the cluster:
+
+```bash
+minikube delete
+```

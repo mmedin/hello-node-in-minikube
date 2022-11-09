@@ -167,3 +167,18 @@ Hemos llegado al final, y como resultado tenemos que poder ver nuestra app funci
 ```bash
 minikube service hello-node
 ```
+
+## Limpieza
+
+Eliminamos los recursos en el orden inverso al creado:
+
+```bash
+kubectl delete service hello-node
+kubectl delete deployment hello-node
+```
+
+Eliminamos el clúster:
+
+```bash
+minikube delete
+```
